@@ -1,0 +1,129 @@
+:root {
+  --navy: #1b365d;
+  --navy-2: #142844;
+  --teal: #0e6b5c;
+  --teal-2: #0a5549;
+  --red: #b42318;
+  --amber: #b54708;
+  --green: #067647;
+  --line: #d7deea;
+  --bg: #eef2f7;
+  --card: #ffffff;
+  --muted: #5b6b80;
+  --text: #152033;
+  --shadow: 0 8px 24px rgba(21, 32, 51, 0.08);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: "Be Vietnam Pro", "Segoe UI", system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+a { color: var(--navy); }
+.top {
+  background: linear-gradient(120deg, var(--navy), var(--navy-2));
+  color: #fff;
+  padding: 16px 20px 18px;
+}
+.top .brand { font-size: 12px; letter-spacing: .08em; opacity: .8; text-transform: uppercase; }
+.top h1 { margin: 4px 0 0; font-size: 20px; font-weight: 700; }
+.wrap { max-width: 920px; margin: 0 auto; padding: 16px; }
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 14px;
+  box-shadow: var(--shadow);
+}
+h2 { margin: 0 0 12px; font-size: 16px; }
+label { display: block; font-size: 13px; font-weight: 600; margin: 10px 0 6px; }
+input, textarea, select {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font: inherit;
+  background: #fff;
+  color: var(--text);
+}
+textarea { min-height: 92px; resize: vertical; }
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 0;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+  text-decoration: none;
+}
+.btn-primary { background: var(--teal); color: #fff; }
+.btn-primary:hover { background: var(--teal-2); }
+.btn-navy { background: var(--navy); color: #fff; }
+.btn-ghost { background: #eef2f7; color: var(--navy); }
+.btn-danger { background: #f8e6e4; color: var(--red); }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.task-list { display: grid; gap: 10px; }
+.task-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px;
+  text-decoration: none;
+  color: inherit;
+  background: #f8fafc;
+}
+.task-row:hover { border-color: #b7c6db; }
+.task-row h3 { margin: 0 0 4px; font-size: 15px; }
+.meta { color: var(--muted); font-size: 13px; }
+.badge {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 3px 8px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.badge-open { background: #fff4e5; color: var(--amber); }
+.badge-done { background: #e6f6ee; color: var(--green); }
+.bar { height: 8px; background: #e4eaf2; border-radius: 99px; overflow: hidden; margin-top: 8px; }
+.bar > span { display: block; height: 100%; background: var(--teal); }
+.item {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 8px 0;
+  border-bottom: 1px solid #eef2f7;
+}
+.item input { width: 18px; height: 18px; margin-top: 3px; }
+.item.done span { text-decoration: line-through; color: var(--muted); }
+.log { border-left: 3px solid var(--navy); padding: 6px 0 6px 10px; margin: 8px 0; }
+.log .when { font-size: 12px; color: var(--muted); }
+.hidden { display: none !important; }
+.toast {
+  position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
+  background: var(--navy); color: #fff; padding: 10px 14px; border-radius: 10px;
+  font-size: 14px; z-index: 20;
+}
+.code { font-family: ui-monospace, Menlo, Consolas, monospace; letter-spacing: .06em; }
+.linkbox {
+  background: #f3f6fb; border: 1px dashed #b7c6db; border-radius: 10px;
+  padding: 10px 12px; word-break: break-all; font-size: 13px;
+}
+.empty { color: var(--muted); padding: 8px 0; }
+@media (max-width: 640px) {
+  .row { grid-template-columns: 1fr; }
+  .top h1 { font-size: 18px; }
+}
+.next { margin-top: 6px; font-size: 13px; color: #9a3b00; }
+.nextbox { margin: 10px 0; padding: 10px 12px; background: #fff6e8; border: 1px solid #f0d2a8; border-radius: 10px; color: #7a3b00; font-size: 14px; }
+.task-row.hot { border-color: #e8b4ae; background: #fff8f7; }
