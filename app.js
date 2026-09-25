@@ -1,0 +1,40 @@
+const $= (s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const state={mode:"local",tasks:{}};
+function toast(m){const e=document.createElement("div");e.className="toast";e.textContent=m;document.body.appendChild(e);setTimeout(()=>e.remove(),1800)}
+function code6(){const a="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";return Array.from({length:6},()=>a[Math.floor(Math.random()*a.length)]).join("")}
+function loadLocal(){try{return JSON.parse(localStorage.getItem("ac_tasks")||"{}")}catch{return{}}}
+function saveLocal(){localStorage.setItem("ac_tasks",JSON.stringify(state.tasks))}
+function calcPercent(items){if(!items||!items.length)return 0;return Math.round(100*items.filter(i=>i.done).length/items.length)}
+function route(){const h=location.hash.replace("#","");if(h.startsWith("t/"))return{name:"task",code:h.slice(2).toUpperCase()};const q=new URLSearchParams(location.search).get("t");if(q)return{name:"task",code:q.toUpperCase()};return{name:"home"}}
+function taskLink(code){return location.origin+location.pathname.replace(/index\.html$/,"")+"#t/"+code}
+async function detectMode(){state.mode="local";const local=loadLocal();try{const r=await fetch("tasks.json",{cache:"no-store"});if(r.ok){const data=await r.json();const seed=data.tasks||{};state.tasks=Object.assign({},seed,local);if(!Object.keys(local).length)saveLocal();return}}catch(e){}state.tasks=local}
+async function listTasks(){return Object.values(state.tasks).sort((a,b)=>(b.created_at||"").localeCompare(a.created_at||""))}
+async function getTask(code){return state.tasks[code]||null}
+async function createTask(payload){const items=(payload.items_text||"").split("\n").map(s=>s.trim()).filter(Boolean).map(text=>({id:code6(),text,done:false}));let code=code6();while(state.tasks[code])code=code6();const task={code,title:payload.title.trim(),assignee:(payload.assignee||"").trim(),due:payload.due||"",detail:(payload.detail||"").trim(),items,logs:[],percent:calcPercent(items),status:"open",created_at:new Date().toISOString().slice(0,19),updated_at:new Date().toISOString().slice(0,19)};state.tasks[code]=task;saveLocal();return task}
+async function patchTask(code,payload){const task=state.tasks[code];if(!task)throw new Error("Khong tim thay");if(payload.toggle_item){const item=task.items.find(i=>i.id===payload.toggle_item);if(item)item.done=!item.done}if(payload.add_item)task.items.push({id:code6(),text:payload.add_item,done:false});task.percent=calcPercent(task.items);if(task.percent===100&&task.items.length)task.status="done";else if(task.status==="done"&&task.percent<100)task.status="open";const note=(payload.note||"").trim();if(note||payload.log_progress){task.logs=task.logs||[];task.logs.unshift({at:new Date().toISOString().slice(0,19),by:payload.by||"Team",note,percent:task.percent})}task.updated_at=new Date().toISOString().slice(0,19);saveLocal();return task}
+function escapeHtml(s){return String(s||"").replaceAll("&","&").replaceAll("<","<").replaceAll(">",">").replaceAll('"',""")}
+function renderHome(tasks){
+  $("#app").innerHTML=`<div class=\"card\"><h2>Tạo task mới</h2><form id=\"create-form\"><label>Tên việc</label><input id=\"title\" required><div class=\"row\"><div><label>Người nhận</label><input id=\"assignee\"></div><div><label>Hạn</label><input id=\"due\" type=\"date\"></div></div><label>Việc chi tiết</label><textarea id=\"detail\"></textarea><label>Checklist, mỗi dòng một việc</label><textarea id=\"items\"></textarea><div class=\"actions\"><button class=\"btn btn-primary\" type=\"submit\">Tạo task và lấy link</button></div></form></div><div class=\"card\"><h2>Danh sách task</h2><div class=\"task-list\" id=\"list\"></div></div>`;
+  const list=$("#list");
+  if(!tasks.length)list.innerHTML=`<p class=\"empty\">Chưa có task.</p>`;
+  else {
+    const ordered=[...tasks].sort((a,b)=>Number(!!b.hot)-Number(!!a.hot));
+    list.innerHTML=ordered.map(t=>`<a class=\"task-row ${t.hot?\"hot\":\"\"}\" href=\"#t/${t.code}\"><div><h3>${escapeHtml(t.title)}</h3><div class=\"meta\"><span class=\"code\">${t.ma||t.code}</span> · ${escapeHtml(t.assignee||\"Chưa gán\")}${t.plant?\" · NM \"+t.plant:\"\"}${t.due?\" · hạn \"+t.due:\"\"}${t.hot?\" · NÓNG\":\"\"}</div>${t.next_step?`<div class=\"next\">Làm tiếp: ${escapeHtml(t.next_step)}</div>`:\"\"}<div class=\"bar\"><span style=\"width:${t.percent||0}%\"></span></div></div><span class=\"badge ${t.status===\"done\"?\"badge-done\":\"badge-open\"}\">${t.percent||0}%</span></a>`).join(\"\");
+  }
+  $("#create-form").addEventListener(\"submit\",async e=>{e.preventDefault();const title=$(\"#title\").value.trim();if(!title)return;const task=await createTask({title,assignee:$(\"#assignee\").value,due:$(\"#due\").value,detail:$(\"#detail\").value,items_text:$(\"#items\").value});toast(\"Đã tạo \"+task.code);location.hash=\"t/\"+task.code});
+}
+function renderTask(task){
+  if(!task){$("#app").innerHTML=`<div class=\"card\"><p>Không tìm thấy task.</p><a class=\"btn btn-ghost\" href=\"#\">Về danh sách</a></div>`;return}
+  const link=taskLink(task.code);
+  $("#app").innerHTML=`<div class=\"card\"><div class=\"meta\">Mã <span class=\"code\">${task.code}</span> <span class=\"badge ${task.status===\"done\"?\"badge-done\":\"badge-open\"}\">${task.status===\"done\"?\"Xong\":\"Đang làm\"}</span></div><h2 style=\"margin-top:8px\">${escapeHtml(task.title)}</h2><div class=\"meta\">${escapeHtml(task.assignee||\"Chưa gán\")}${task.plant?\" · nhà máy \"+task.plant:\"\"}${task.due?\" · hạn \"+task.due:\"\"}</div>${task.next_step?`<div class=\"nextbox\"><b>Làm tiếp:</b> ${escapeHtml(task.next_step)}</div>`:\"\"}<div class=\"bar\"><span style=\"width:${task.percent||0}%\"></span></div><p class=\"meta\">${task.percent||0}% hoàn thành</p>${task.detail?`<p>${escapeHtml(task.detail).replace(/\\n/g,\"<br>\")}</p>`:\"\"}<p class=\"meta\">Link cho team</p><div class=\"linkbox\">${link}</div><div class=\"actions\"><button class=\"btn btn-navy\" id=\"copy-link\" type=\"button\">Copy link</button><a class=\"btn btn-ghost\" href=\"#\">Về danh sách</a></div></div><div class=\"card\"><h2>Công việc chi tiết</h2><div id=\"items\"></div><div class=\"row\" style=\"margin-top:10px\"><input id=\"new-item\" placeholder=\"Thêm việc con\"><button class=\"btn btn-ghost\" id=\"add-item\" type=\"button\">Thêm dòng</button></div></div><div class=\"card\"><h2>Ghi tiến độ</h2><label>Người ghi</label><input id=\"by\" placeholder=\"Tên của mình\"><label>Nội dung cập nhật</label><textarea id=\"note\"></textarea><div class=\"actions\"><button class=\"btn btn-primary\" id=\"save-note\" type=\"button\">Lưu nhật ký</button></div><div id=\"logs\"></div></div>`;
+  $("#items").innerHTML=(task.items||[]).map(i=>`<label class=\"item ${i.done?\"done\":\"\"}\"><input type=\"checkbox\" data-id=\"${i.id}\" ${i.done?\"checked\":\"\"}><span>${escapeHtml(i.text)}</span></label>`).join(\"\")||`<p class=\"empty\">Chưa có dòng việc.</p>`;
+  $("#logs").innerHTML=(task.logs||[]).map(l=>`<div class=\"log\"><div class=\"when\">${escapeHtml(l.at)} · ${escapeHtml(l.by)} · ${l.percent}%</div><div>${escapeHtml(l.note||\"Cập nhật checklist\")}</div></div>`).join(\"\")||`<p class=\"empty\">Chưa có nhật ký.</p>`;
+  $("#copy-link").onclick=async()=>{try{await navigator.clipboard.writeText(link);toast(\"Đã copy link\")}catch{toast(\"Copy tay trong ô link\")}};
+  $$("#items input[type=checkbox]").forEach(box=>box.addEventListener(\"change\",async()=>{renderTask(await patchTask(task.code,{toggle_item:box.dataset.id,log_progress:true,by:$(\"#by\").value}))}));
+  $("#add-item").onclick=async()=>{const text=$(\"#new-item\").value.trim();if(!text)return;renderTask(await patchTask(task.code,{add_item:text,by:$(\"#by\").value}))};
+  $("#save-note").onclick=async()=>{const note=$(\"#note\").value.trim();if(!note)return;renderTask(await patchTask(task.code,{note,by:$(\"#by\").value||\"Team\"}))};
+}
+async function boot(){await detectMode();const r=route();if(r.name===\"task\")renderTask(await getTask(r.code));else renderHome(await listTasks())}
+window.addEventListener(\"hashchange\",boot);
+boot();
