@@ -3,16 +3,9 @@
 Site team:
 https://sihvuong-ux.github.io/ac-bao-cao-tien-do/
 
-Link viec:
-- FSC Trung: #t/CN0101
-- BIS Si: #t/CN0201
-- Hop quy MDF Si: #t/CN0301
-- Green Label Si: #t/CN0401
-- Hop quy san Khang (NONG): #t/CN0501
-- ENF Si: #t/CN0601
-- EPA FOC Khang: #t/LE0101
+Cap nhat 28.09.2026:
+- Da xoa toan bo task tren app.
+- 7 viec cu (CN-01 den CN-06, LE-01) chuyen sang file Excel theo doi.
+- Khong tao lai task tren site nay tru khi Jun yeu cau.
 
-Vi du viec nong:
-https://sihvuong-ux.github.io/ac-bao-cao-tien-do/#t/CN0501
-
-Tien do tick tren may minh. Chua dong bo giua cac may.
+Neu may minh van thay task cu: F12 > Application > Local Storage > xoa khoa `ac_tasks` > F5.
