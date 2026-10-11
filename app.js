@@ -47,7 +47,7 @@ async function bootData() {
 function renderHome() {
   var tasks = Object.keys(state.tasks).map(function (k) { return state.tasks[k]; });
   tasks.sort(function (a, b) { return Number(!!b.hot) - Number(!!a.hot); });
-  var html = "<div class=\"card\"><h2>Danh sach task</h2><div class=\"task-list\" id=\"list\"></div></div>";
+  var html = "<div class=\"card\"><h2>Danh sách công việc</h2><div class=\"task-list\" id=\"list\"></div></div>";
   $("#app").innerHTML = html;
   var out = "";
   for (var i = 0; i < tasks.length; i++) {
@@ -55,30 +55,30 @@ function renderHome() {
     out += "<a class=\"task-row" + (t.hot ? " hot" : "") + "\" href=\"#t/" + t.code + "\"><div>";
     out += "<h3>" + escapeHtml(t.title) + "</h3>";
     out += "<div class=\"meta\"><span class=\"code\">" + escapeHtml(t.ma || t.code) + "</span> · " + escapeHtml(t.assignee || "");
-    if (t.due) out += " · han " + escapeHtml(t.due);
-    if (t.hot) out += " · NONG";
+    if (t.due) out += " · hạn " + escapeHtml(t.due);
+    if (t.hot) out += " · NÓNG";
     out += "</div>";
-    if (t.next_step) out += "<div class=\"next\">Lam tiep: " + escapeHtml(t.next_step) + "</div>";
+    if (t.next_step) out += "<div class=\"next\">Làm tiếp: " + escapeHtml(t.next_step) + "</div>";
     out += "<div class=\"bar\"><span style=\"width:" + (t.percent || 0) + "%\"></span></div></div>";
     out += "<span class=\"badge badge-open\">" + (t.percent || 0) + "%</span></a>";
   }
-  $("#list").innerHTML = out || "<p class=\"empty\">Chua co task.</p>";
+  $("#list").innerHTML = out || "<p class=\"empty\">Chưa có công việc.</p>";
 }
 function renderTask(task) {
   if (!task) {
-    $("#app").innerHTML = "<div class=\"card\"><p>Khong tim thay.</p><a class=\"btn btn-ghost\" href=\"#\">Ve danh sach</a></div>";
+    $("#app").innerHTML = "<div class=\"card\"><p>Không tìm thấy.</p><a class=\"btn btn-ghost\" href=\"#\">Về danh sách</a></div>";
     return;
   }
-  var html = "<div class=\"card\"><div class=\"meta\">Ma <span class=\"code\">" + task.code + "</span></div>";
+  var html = "<div class=\"card\"><div class=\"meta\">Mã <span class=\"code\">" + task.code + "</span></div>";
   html += "<h2>" + escapeHtml(task.title) + "</h2>";
-  html += "<div class=\"meta\">" + escapeHtml(task.assignee || "") + (task.due ? " · han " + escapeHtml(task.due) : "") + "</div>";
-  if (task.next_step) html += "<div class=\"nextbox\"><b>Lam tiep:</b> " + escapeHtml(task.next_step) + "</div>";
+  html += "<div class=\"meta\">" + escapeHtml(task.assignee || "") + (task.due ? " · hạn " + escapeHtml(task.due) : "") + "</div>";
+  if (task.next_step) html += "<div class=\"nextbox\"><b>Làm tiếp:</b> " + escapeHtml(task.next_step) + "</div>";
   html += "<div class=\"bar\"><span style=\"width:" + (task.percent || 0) + "%\"></span></div>";
   if (task.detail) html += "<p>" + escapeHtml(task.detail).replace(/\n/g, "<br>") + "</p>";
-  html += "<div class=\"actions\"><a class=\"btn btn-ghost\" href=\"#\">Ve danh sach</a></div></div>";
-  html += "<div class=\"card\"><h2>Checklist</h2><div id=\"items\"></div></div>";
-  html += "<div class=\"card\"><h2>Ghi tien do</h2><input id=\"by\" placeholder=\"Ten\"><textarea id=\"note\"></textarea>";
-  html += "<div class=\"actions\"><button class=\"btn btn-primary\" id=\"save-note\" type=\"button\">Luu</button></div><div id=\"logs\"></div></div>";
+  html += "<div class=\"actions\"><a class=\"btn btn-ghost\" href=\"#\">Về danh sách</a></div></div>";
+  html += "<div class=\"card\"><h2>Việc cần làm</h2><div id=\"items\"></div></div>";
+  html += "<div class=\"card\"><h2>Ghi tiến độ</h2><input id=\"by\" placeholder=\"Tên\"><textarea id=\"note\" placeholder=\"Ghi chú tiến độ\"></textarea>";
+  html += "<div class=\"actions\"><button class=\"btn btn-primary\" id=\"save-note\" type=\"button\">Lưu</button></div><div id=\"logs\"></div></div>";
   $("#app").innerHTML = html;
   var items = task.items || [];
   var out = "";
@@ -100,10 +100,10 @@ function renderTask(task) {
     var note = $("#note").value.trim();
     if (!note) return;
     task.logs = task.logs || [];
-    task.logs.unshift({ at: new Date().toISOString().slice(0, 19), by: $("#by").value || "Team", note: note, percent: task.percent });
+    task.logs.unshift({ at: new Date().toISOString().slice(0, 19), by: $("#by").value || "Đội", note: note, percent: task.percent });
     saveLocal();
     renderTask(task);
-    toast("Da luu");
+    toast("Đã lưu");
   };
 }
 async function boot() {
